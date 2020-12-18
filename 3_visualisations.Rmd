@@ -1,0 +1,188 @@
+---
+title: "3_visualisations"
+author: "Mads Birch Sørensen"
+date: "12/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+library(ggplot2)
+library(tidyverse)
+```
+
+3 - Data visualisation
+
+EXERCISE 3.2.4
+1. There is negative relationship between dislpacement and miles per gallon on the highway. The relationg ships seems to be linear with exception of some outliers which have better milage than expected for their engine size.
+
+2. 234
+
+3. the drivetrain, rear wheel drive, 4wd etc.
+
+5. Not useful as the plot only shows combinations of drivetrain and class.
+
+```{r}
+# Loading data
+d = ggplot2::mpg
+
+# 1. 
+ggplot(d)+
+  geom_point(aes(displ, hwy))
+
+# 2. 
+dim(d)
+
+# 4. 
+ggplot(d)+
+  geom_point(aes(cyl, hwy))
+
+# 5. 
+ggplot(d)+
+  geom_point(aes(class, drv))
+
+```
+3.3 Aesthetic mappings
+
+You visualise your data by mapping selected variables to a range of aesthetics. Apart from having variables assigned to the x and y axes, you can also use aesthetics like color, shape and size to include additional variables. Like in the example below where displacement (size of engine) is assigned to the x-axis and hwy (miles per gallon on highway) is mapped to the y-axis, the vehicle class is mapped to the color asthetic to include this information in the visualisation.
+
+3.3.1 EXERCISE
+
+1. the color setting has to go outside of aes().
+
+2.
+
+3. 
+
+```{r pressure, echo=FALSE}
+# the general template for plotting using ggplot2 is 
+'''
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+'''
+
+# Using class as an additional aesthetic in a scatterplot.
+# Note the mpg data is loaded when loading the tidyverse package
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x = displ, y = hwy, color = displ < 5))
+
+
+# the stroke aestethic determines the size/thickness of the lines/points when using the shape aesthetic
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class, stroke = 1.2))
+
+```
+3.5 Facets
+
+It can be useful, especially for categorical variables, to split your plot into facets/subplots that each display one subset of the data.
+
+```{r}
+# Facetting by the class variable
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x = displ, y = hwy))+
+  facet_wrap(~class, nrow= 2)
+
+# you can also facet you plot on the combination of two variables using the facet_grid() function
+# or use a dot . if you dont want to facet in either the row or column dimension
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ .)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(. ~ cyl)
+
+ggplot(d) + 
+  geom_point(mapping = aes(x = drv, y = cyl))
+
+```
+
+3.6 Geometric objetcs
+
+Different geoms are used to represent data differently as either barplot, scatterplots, lineplots etc. Each geom (kind of plot) represent different kinds of data better than others.
+
+You can add several layers to the plot by using several geoms in the same plot.
+
+```{r}
+# If you want to plot the same data (same x and y) in the same plot using multiple geoms you can specify the mappings in the "ggplot" section. If you do this, ggplot will treat these mappings as global.
+# you can also specify different mappings for each geom
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth()
+
+# you can also specify different data for each geom
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point() + 
+  geom_smooth(se = F, show.legend = F)
+
+```
+
+3.6.1 Exercises
+
+```{r}
+# 6. recreating plots
+# 1
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 4) + 
+  geom_smooth(se = F)
+
+# 2
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 4) + 
+  geom_smooth(aes(group = drv), se = F, size = 1.5)
+
+# 3
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point(size = 4) + 
+  geom_smooth(se = F, size = 1.5)
+
+# 4
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(aes(color = drv),size = 4) + 
+  geom_smooth(se = F, size = 1.5)
+
+# 5
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point(size = 4) + 
+  geom_smooth(aes(linetype = drv), color = 'blue', se = F, size = 1.5)
+
+# 6
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(size = 4, color = "white") +
+  geom_point(aes(colour = drv))
+```
+
+3.7 Statistical transformations
+
+Bar charts exemplifies a group of plots which plot a the count of a given variable. The count does not exist in the dataframe as variable, but is computed using different methods. 
+
+The algorithm used to calculate the new values is called a stat, short for statistical transformation.
+
+
+
+```{r}
+# bar charts
+# the bar chart uses the stat_count() statistic as default, but each stat argument uses a specific geom as well. Stat and geom argument can be used interchangeably for this reason.
+
+dd = ggplot2::diamonds
+
+ggplot(dd) + 
+  geom_bar(mapping = aes(x = cut))
+
+
+ggplot(dd) + 
+  geom_col(mapping = aes(cut, price))
+
+```
+
