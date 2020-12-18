@@ -14,14 +14,14 @@ library(ggplot2)
 library(tidyverse)
 ```
 
-3 - Data visualisation
+3 - Data visualization
 
 EXERCISE 3.2.4
-1. There is negative relationship between dislpacement and miles per gallon on the highway. The relationg ships seems to be linear with exception of some outliers which have better milage than expected for their engine size.
+1. There is negative relationship between displacement and miles per gallon on the highway. The relationships seems to be linear with exception of some outliers which have better mileage than expected for their engine size.
 
 2. 234
 
-3. the drivetrain, rear wheel drive, 4wd etc.
+3. the drivetrain, rear wheel drive, 4-wd etc.
 
 5. Not useful as the plot only shows combinations of drivetrain and class.
 
@@ -59,10 +59,9 @@ You visualise your data by mapping selected variables to a range of aesthetics. 
 
 ```{r pressure, echo=FALSE}
 # the general template for plotting using ggplot2 is 
-'''
+"""
 ggplot(data = <DATA>) + 
-  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
-'''
+  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))"""
 
 # Using class as an additional aesthetic in a scatterplot.
 # Note the mpg data is loaded when loading the tidyverse package
@@ -168,9 +167,18 @@ ggplot(mpg, aes(x = displ, y = hwy)) +
 Bar charts exemplifies a group of plots which plot a the count of a given variable. The count does not exist in the dataframe as variable, but is computed using different methods. 
 
 The algorithm used to calculate the new values is called a stat, short for statistical transformation.
+- Each plot has its own default stat, and the stat can be changed-
+
+smoothers fit a model to your data and then plot predictions from the model.
 
 
+3.7.1 - Exercises
 
+1. defualt geom associated with stat_summary() is 
+
+2. read ?geom_vol for answer
+
+3. 
 ```{r}
 # bar charts
 # the bar chart uses the stat_count() statistic as default, but each stat argument uses a specific geom as well. Stat and geom argument can be used interchangeably for this reason.
@@ -181,8 +189,119 @@ ggplot(dd) +
   geom_bar(mapping = aes(x = cut))
 
 
+ggplot(dd) +
+  stat_summary(aes(cut, depth), fun.min = min, fun.max = max, fun = median)
+
+ggplot(dd) +
+  stat_
+  geom_bar(aes(cut, depth), stat="summary")
+
 ggplot(dd) + 
   geom_col(mapping = aes(cut, price))
 
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = after_stat(prop), group = 1))
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = color, y = after_stat(prop), group = 1))
+
 ```
 
+3.8 Position adjustments
+
+
+
+```{r}
+# you color a bar chart
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, colour = cut))
+
+# it is more useful to use the fill variable
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = cut))
+
+# if you fill by another variable you automatically get stacked bars combining cut and clarity
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+
+# you can also use
+
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+  geom_bar(alpha = 1/5, position = "identity")
+
+ggplot(data = diamonds, mapping = aes(x = cut, colour = clarity)) + 
+  geom_bar(fill = NA, position = "identity")
+
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+
+# to improve your scatter plot you can add randomness and thereby spread out the data points a bit to make it easier to spot patterns in the plot.
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
+
+```
+
+3.9 Coordinate systems
+
+You can flip plots e.g. if you want horisontal bar plots.
+
+```{r}
+# plotting spatial data, aspects ratios are important.
+nz <- map_data("nz")
+
+ggplot(nz, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black")
+
+ggplot(nz, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black") +
+  coord_quickmap()
+
+# coord_polar() uses polar coordinates
+
+bar <- ggplot(data = diamonds) + 
+  geom_bar(
+    mapping = aes(x = cut, fill = cut), 
+    show.legend = FALSE,
+    width = 1
+  ) + 
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+bar + coord_flip()
+bar + coord_polar()
+```
+
+3.9.1
+
+```{r}
+# 1. turn a stacked bar chart into a pir chart using coord_polar()
+
+bar2 = ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+  geom_bar(alpha = 1/5, position = "identity")
+
+bar2 + coord_polar()
+
+# 2. adds labels, titles etc.
+
+?labs
+
+#3 
+?coord_quickmap
+
+```
+
+3.10
+
+We know have a new template:
+
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(
+     mapping = aes(<MAPPINGS>),
+     stat = <STAT>, 
+     position = <POSITION>
+  ) +
+  <COORDINATE_FUNCTION> +
+  <FACET_FUNCTION>
+  
+  
